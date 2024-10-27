@@ -44,7 +44,7 @@ sudo systemctl enable isu-go
 
 ```bash
 sudo su - isucon
-/home/isucon/private_isu.git/benchmarker/bin/benchmarker -u /home/isucon/private_isu.git/benchmarker/userdata -t http://52.194.167.18
+/home/isucon/private_isu.git/benchmarker/bin/benchmarker -u /home/isucon/private_isu.git/benchmarker/userdata -t http://52.196.250.55
 ```
 
 ## AWS上のリソース削除
