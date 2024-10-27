@@ -1,6 +1,7 @@
 vendor/
 portal/log
 portal/tmp
+logs
 
 ### Portal
 # Ignore bundler config.
@@ -16,3 +17,4 @@ portal/tmp
 !/portal/log/.keep
 /portal/tmp
 .vagrant
+
