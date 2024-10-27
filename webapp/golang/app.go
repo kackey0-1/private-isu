@@ -686,19 +686,38 @@ func getImage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ext := r.PathValue("ext")
-
 	if ext == "jpg" && post.Mime == "image/jpeg" ||
 		ext == "png" && post.Mime == "image/png" ||
 		ext == "gif" && post.Mime == "image/gif" {
+
+		f, err := os.Create(fmt.Sprintf("../public/img/%d.%s", pid, ext))
+		if err != nil {
+			log.Print(err)
+			return
+		}
+		defer f.Close()
+
+		_, err = f.Write(post.Imgdata)
+		if err != nil {
+			log.Print(err)
+			return
+		}
+
 		w.Header().Set("Content-Type", post.Mime)
-		_, err := w.Write(post.Imgdata)
+
+		_, err = w.Write(post.Imgdata)
 		if err != nil {
 			log.Print(err)
 			return
 		}
 		return
 	}
-
+	// write filedata to image file in /public/img
+	_, err = os.Create(fmt.Sprintf("../public/img/%d.%s", pid, ext))
+	if err != nil {
+		log.Print(err)
+		return
+	}
 	w.WriteHeader(http.StatusNotFound)
 }
 
@@ -822,6 +841,7 @@ func main() {
 		port,
 		dbname,
 	)
+	log.Printf(dsn)
 
 	db, err = sqlx.Open("mysql", dsn)
 	if err != nil {
