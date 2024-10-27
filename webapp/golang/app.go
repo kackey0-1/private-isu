@@ -671,7 +671,7 @@ func postIndex(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	f, err := os.Create(fmt.Sprintf("../public/img/%d.%s", pid, ext))
+	f, err := os.Create(fmt.Sprintf("../public/image/%d.%s", pid, ext))
 	if err != nil {
 		log.Print(err)
 		return
@@ -708,7 +708,7 @@ func getImage(w http.ResponseWriter, r *http.Request) {
 		ext == "png" && post.Mime == "image/png" ||
 		ext == "gif" && post.Mime == "image/gif" {
 
-		f, err := os.Create(fmt.Sprintf("../public/img/%d.%s", pid, ext))
+		f, err := os.Create(fmt.Sprintf("../public/image/%d.%s", pid, ext))
 		if err != nil {
 			log.Print(err)
 			return

@@ -13,7 +13,7 @@ update_nginx_config2="sudo cp /home/isucon/private_isu/nginx/sites-available/isu
 
 clear_images="cd /home/isucon/private_isu/webapp/public/img && ls | grep -E '[0-9]{5,}' | xargs --no-run-if-empty rm"
 restart="cd /home/isucon/private_isu/webapp/golang && /home/isucon/.local/go/bin/go build -o app && sudo systemctl restart isu-go"
-rotate_mysql="sudo mv -v /var/log/mysql/slow.log /var/log/mysql/slow.log.$now && mysqladmin -uisuconp -pisuconp flush-logs && sudo systemctl restart mysql"
+rotate_mysql="sudo mv -v /var/log/mysql/mysql-slow.log /var/log/mysql/mysql-slow.log.$now && mysqladmin -uisuconp -pisuconp flush-logs && sudo systemctl restart mysql"
 rotate_nginx="sudo mv -v /var/log/nginx/access.log /var/log/nginx/access.log.$now && sudo systemctl reload nginx"
 
 git push origin $branch
