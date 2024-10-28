@@ -38,6 +38,18 @@ sudo systemctl stop isu-ruby
 sudo systemctl disable isu-ruby
 sudo systemctl start isu-go
 sudo systemctl enable isu-go
+
+git init 
+git fetch
+git clean -df
+git checkout -b main origin/main
+
+sudo 
+sudo systemctl status isu-go
+sudo systemctl status mysql
+sudo systemctl status nginx
+sudo ls -l /var/log/mysql/
+sudo ls -l /var/log/nginx/
 ```
 
 ## Benchmark実行
@@ -70,7 +82,7 @@ long_query_time = 0.5
 
 -> 以下のindexを追加
 ```sql
-ALTER TABLE comments ADD INDEX comments_post_idx (post_id);
+ALTER TABLE comments ADD INDEX post_id_idx (post_id);
 ```
 
 ### ログフォーマットを修正して調査
