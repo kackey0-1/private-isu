@@ -44,7 +44,7 @@ git fetch
 git clean -df
 git checkout -b main origin/main
 
-sudo ls -l /etc/nginx/
+sudo ls -l /etc/nginx/sites-enabled
 sudo ls -l /etc/nginx/
 sudo ls -l /etc/nginx/
 
@@ -67,7 +67,7 @@ export ISUCONP_DB_NAME=isuconp
 
 ```bash
 sudo su - isucon
-/home/isucon/private_isu.git/benchmarker/bin/benchmarker -u /home/isucon/private_isu.git/benchmarker/userdata -t http://52.196.250.55
+/home/isucon/private_isu.git/benchmarker/bin/benchmarker -u /home/isucon/private_isu.git/benchmarker/userdata -t http://18.178.233.167
 ```
 
 ## AWS上のリソース削除
@@ -119,5 +119,5 @@ server {
 
 ```bash
 scp isucon@52.194.167.18:/var/log/nginx/access.log webapp/logs/access.log
-alp json --sort sum -r -m "posts/[0-9]+,/@\w+,/image/\d+" -o count,method,uri,min,avg,max,sum < webapp/logs/access.log
+alp json --sort sum -r -m "posts/[0-9]+,/@\w+,/image/\d+" -o count,method,uri,min,avg,max,sum < ./logs/access.log
 ```

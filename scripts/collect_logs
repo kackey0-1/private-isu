@@ -7,5 +7,7 @@ REMOTE_HOST="18.178.233.167"
 ACCESS_LOG="/var/log/nginx/access.log"
 SLOW_QUERY_LOG="/var/log/mysql/mysql-slow.log"
 
-scp ${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_DIR}${ACCESS_LOG} ../logs/access.$now.log
-scp ${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_DIR}${SLOW_QUERY_LOG} ../logs/mysql-slow.$now.log
+mv ./logs/access.log ./logs/access.$now.log
+mv ./logs/mysql-slow.log ./logs/mysql-slow.$now.log
+ssh ${REMOTE_USER}@${REMOTE_HOST} "sudo cat ${REMOTE_DIR}${ACCESS_LOG}" > ./logs/access.log
+ssh ${REMOTE_USER}@${REMOTE_HOST} "sudo cat ${REMOTE_DIR}${SLOW_QUERY_LOG}" > ./logs/mysql-slow.log
