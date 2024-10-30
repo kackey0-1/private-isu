@@ -68,8 +68,8 @@ func mimeToExt(mime string) (string, error) {
 
 // getImagesCLI: 100件ずつバッチで画像を取得し、保存する処理をCLIとして実行
 func getImagesCLI() {
-	batchSize := 100       // 1回のクエリで取得する件数
-	totalRecords := 100000 // 処理する総レコード数
+	batchSize := 1000     // 1回のクエリで取得する件数
+	totalRecords := 10000 // 処理する総レコード数
 	totalBatches := totalRecords / batchSize
 
 	for batch := 0; batch < totalBatches; batch++ {
