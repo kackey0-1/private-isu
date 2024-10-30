@@ -175,7 +175,16 @@ func makePosts(results []Post, csrfToken string, allComments bool) ([]Post, erro
 	var posts []Post
 
 	for _, p := range results {
-		err := db.Get(&p.CommentCount, "SELECT COUNT(*) AS `count` FROM `comments` WHERE `post_id` = ?", p.ID)
+		err := db.Get(&p.User, "SELECT * FROM `users` WHERE `id` = ?", p.UserID)
+		if err != nil {
+			return nil, err
+		}
+
+		if p.User.DelFlg == 1 {
+			continue
+		}
+
+		err = db.Get(&p.CommentCount, "SELECT COUNT(*) AS `count` FROM `comments` WHERE `post_id` = ?", p.ID)
 		if err != nil {
 			return nil, err
 		}
@@ -203,17 +212,9 @@ func makePosts(results []Post, csrfToken string, allComments bool) ([]Post, erro
 		}
 
 		p.Comments = comments
-
-		err = db.Get(&p.User, "SELECT * FROM `users` WHERE `id` = ?", p.UserID)
-		if err != nil {
-			return nil, err
-		}
-
 		p.CSRFToken = csrfToken
+		posts = append(posts, p)
 
-		if p.User.DelFlg == 0 {
-			posts = append(posts, p)
-		}
 		if len(posts) >= postsPerPage {
 			break
 		}
@@ -613,15 +614,19 @@ func postIndex(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	ext := ""
 	mime := ""
 	if file != nil {
 		// 投稿のContent-Typeからファイルのタイプを決定する
 		contentType := header.Header["Content-Type"][0]
 		if strings.Contains(contentType, "jpeg") {
 			mime = "image/jpeg"
+			ext = "jpg"
 		} else if strings.Contains(contentType, "png") {
+			ext = "png"
 			mime = "image/png"
 		} else if strings.Contains(contentType, "gif") {
+			ext = "gif"
 			mime = "image/gif"
 		} else {
 			session := getSession(r)
@@ -653,7 +658,7 @@ func postIndex(w http.ResponseWriter, r *http.Request) {
 		query,
 		me.ID,
 		mime,
-		filedata,
+		"", // filedata,
 		r.FormValue("body"),
 	)
 	if err != nil {
@@ -667,40 +672,67 @@ func postIndex(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.Redirect(w, r, "/posts/"+strconv.FormatInt(pid, 10), http.StatusFound)
-}
-
-func getImage(w http.ResponseWriter, r *http.Request) {
-	pidStr := r.PathValue("id")
-	pid, err := strconv.Atoi(pidStr)
+	f, err := os.Create(fmt.Sprintf("../public/image/%d.%s", pid, ext))
 	if err != nil {
-		w.WriteHeader(http.StatusNotFound)
+		log.Print(err)
 		return
 	}
+	defer f.Close()
 
-	post := Post{}
-	err = db.Get(&post, "SELECT * FROM `posts` WHERE `id` = ?", pid)
+	_, err = f.Write(filedata)
 	if err != nil {
 		log.Print(err)
 		return
 	}
 
-	ext := r.PathValue("ext")
-
-	if ext == "jpg" && post.Mime == "image/jpeg" ||
-		ext == "png" && post.Mime == "image/png" ||
-		ext == "gif" && post.Mime == "image/gif" {
-		w.Header().Set("Content-Type", post.Mime)
-		_, err := w.Write(post.Imgdata)
-		if err != nil {
-			log.Print(err)
-			return
-		}
-		return
-	}
-
-	w.WriteHeader(http.StatusNotFound)
+	http.Redirect(w, r, "/posts/"+strconv.FormatInt(pid, 10), http.StatusFound)
 }
+
+// func getImage(w http.ResponseWriter, r *http.Request) {
+// 	pidStr := r.PathValue("id")
+// 	pid, err := strconv.Atoi(pidStr)
+// 	if err != nil {
+// 		w.WriteHeader(http.StatusNotFound)
+// 		return
+// 	}
+
+// 	post := Post{}
+// 	err = db.Get(&post, "SELECT * FROM `posts` WHERE `id` = ?", pid)
+// 	if err != nil {
+// 		log.Print(err)
+// 		return
+// 	}
+
+// 	ext := r.PathValue("ext")
+
+// 	if ext == "jpg" && post.Mime == "image/jpeg" ||
+// 		ext == "png" && post.Mime == "image/png" ||
+// 		ext == "gif" && post.Mime == "image/gif" {
+
+// 		f, err := os.Create(fmt.Sprintf("../public/image/%d.%s", pid, ext))
+// 		if err != nil {
+// 			log.Print(err)
+// 			return
+// 		}
+// 		defer f.Close()
+
+// 		_, err = f.Write(post.Imgdata)
+// 		if err != nil {
+// 			log.Print(err)
+// 			return
+// 		}
+
+// 		w.Header().Set("Content-Type", post.Mime)
+// 		_, err = w.Write(post.Imgdata)
+// 		if err != nil {
+// 			log.Print(err)
+// 			return
+// 		}
+// 		return
+// 	}
+
+// 	w.WriteHeader(http.StatusNotFound)
+// }
 
 func postComment(w http.ResponseWriter, r *http.Request) {
 	me := getSessionUser(r)
@@ -841,7 +873,7 @@ func main() {
 	r.Get("/posts", getPosts)
 	r.Get("/posts/{id}", getPostsID)
 	r.Post("/", postIndex)
-	r.Get("/image/{id}.{ext}", getImage)
+	// r.Get("/image/{id}.{ext}", getImage)
 	r.Post("/comment", postComment)
 	r.Get("/admin/banned", getAdminBanned)
 	r.Post("/admin/banned", postAdminBanned)
