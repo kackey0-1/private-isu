@@ -3,7 +3,7 @@
 
 now=$(date +%Y%m%d-%H%M%S)
 REMOTE_USER="isucon"
-REMOTE_HOST="52.192.163.208"
+REMOTE_HOST="18.178.233.167"
 ACCESS_LOG="/var/log/nginx/access.log"
 SLOW_QUERY_LOG="/var/log/mysql/mysql-slow.log"
 

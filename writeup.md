@@ -44,12 +44,23 @@ git fetch
 git clean -df
 git checkout -b main origin/main
 
-sudo 
+sudo ls -l /etc/nginx/
+sudo ls -l /etc/nginx/
+sudo ls -l /etc/nginx/
+
+
+sudo ls -l /var/log/mysql/
+sudo ls -l /var/log/nginx/
+
 sudo systemctl status isu-go
 sudo systemctl status mysql
 sudo systemctl status nginx
-sudo ls -l /var/log/mysql/
-sudo ls -l /var/log/nginx/
+
+export ISUCONP_DB_HOST=127.0.0.1
+export ISUCONP_DB_PORT=3306
+export ISUCONP_DB_USER=isuconp
+export ISUCONP_DB_PASSWORD=isuconp
+export ISUCONP_DB_NAME=isuconp
 ```
 
 ## Benchmark実行

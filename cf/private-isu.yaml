@@ -89,6 +89,10 @@ Resources:
           curl -s https://github.com/$GITHUB_USER.keys >> /home/isucon/.ssh/authorized_keys
           chown -R isucon:isucon /home/isucon/.ssh
           chmod 600 /home/isucon/.ssh/authorized_keys
+          sudo systemctl stop isu-ruby
+          sudo systemctl disable isu-ruby
+          sudo systemctl start isu-go
+          sudo systemctl enable isu-go
       Tags:
         - Key: Name
           Value: ServerInstance

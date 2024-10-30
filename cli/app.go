@@ -94,7 +94,7 @@ func getImagesCLI() {
 			}
 
 			// 画像データをファイルに書き出し
-			filePath := fmt.Sprintf("../public/image/%d.%s", post.ID, ext)
+			filePath := fmt.Sprintf("../webapp/public/image/%d.%s", post.ID, ext)
 			err = writeImageToFile(filePath, post.Imgdata)
 			if err != nil {
 				log.Print(err)
