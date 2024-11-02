@@ -386,8 +386,24 @@ func getIndex(w http.ResponseWriter, r *http.Request) {
 	me := getSessionUser(r)
 
 	results := []Post{}
-
-	err := db.Select(&results, "SELECT `id`, `user_id`, `body`, `mime`, `created_at` FROM `posts` ORDER BY `created_at` DESC")
+	query := `
+	SELECT
+		posts.id, 
+        posts.user_id, 
+        posts.body, 
+        posts.mime, 
+        posts.created_at,
+        users.id AS "user.id", 
+        users.account_name AS "user.account_name", 
+        users.passhash AS "user.passhash", 
+        users.authority AS "user.authority", 
+        users.del_flg AS "user.del_flg", 
+        users.created_at AS "user.created_at"
+	FROM posts
+	JOIN users ON posts.user_id = users.id
+	WHERE users.del_flg = 0
+    ORDER BY posts.created_at DESC`
+	err := db.Select(&results, query)
 	if err != nil {
 		log.Print(err)
 		return
@@ -432,8 +448,25 @@ func getAccountName(w http.ResponseWriter, r *http.Request) {
 	}
 
 	results := []Post{}
-
-	err = db.Select(&results, "SELECT `id`, `user_id`, `body`, `mime`, `created_at` FROM `posts` WHERE `user_id` = ? ORDER BY `created_at` DESC", user.ID)
+	query := `
+	SELECT
+		posts.id, 
+        posts.user_id, 
+        posts.body, 
+        posts.mime, 
+        posts.created_at,
+        users.id AS "user.id", 
+        users.account_name AS "user.account_name", 
+        users.passhash AS "user.passhash", 
+        users.authority AS "user.authority", 
+        users.del_flg AS "user.del_flg", 
+        users.created_at AS "user.created_at"
+	FROM posts
+	JOIN users ON posts.user_id = users.id
+	WHERE users.id = ?
+	AND users.del_flg = 0
+    ORDER BY posts.created_at DESC`
+	err = db.Select(&results, query, user.ID)
 	if err != nil {
 		log.Print(err)
 		return
@@ -521,7 +554,25 @@ func getPosts(w http.ResponseWriter, r *http.Request) {
 	}
 
 	results := []Post{}
-	err = db.Select(&results, "SELECT `id`, `user_id`, `body`, `mime`, `created_at` FROM `posts` WHERE `created_at` <= ? ORDER BY `created_at` DESC", t.Format(ISO8601Format))
+	query := `
+	SELECT
+		posts.id, 
+        posts.user_id, 
+        posts.body, 
+        posts.mime, 
+        posts.created_at,
+        users.id AS "user.id", 
+        users.account_name AS "user.account_name", 
+        users.passhash AS "user.passhash", 
+        users.authority AS "user.authority", 
+        users.del_flg AS "user.del_flg", 
+        users.created_at AS "user.created_at"
+	FROM posts
+	JOIN users ON posts.user_id = users.id
+	WHERE posts.created_at <= ?
+	AND users.del_flg = 0
+    ORDER BY posts.created_at DESC`
+	err = db.Select(&results, query, t.Format(ISO8601Format))
 	if err != nil {
 		log.Print(err)
 		return
@@ -557,7 +608,23 @@ func getPostsID(w http.ResponseWriter, r *http.Request) {
 	}
 
 	results := []Post{}
-	err = db.Select(&results, "SELECT * FROM `posts` WHERE `id` = ?", pid)
+	query := `
+	SELECT
+		posts.id, 
+        posts.user_id, 
+        posts.body, 
+        posts.mime, 
+        posts.created_at,
+        users.id AS "user.id", 
+        users.account_name AS "user.account_name", 
+        users.passhash AS "user.passhash", 
+        users.authority AS "user.authority", 
+        users.del_flg AS "user.del_flg", 
+        users.created_at AS "user.created_at"
+	FROM posts
+	JOIN users ON posts.user_id = users.id
+	WHERE posts.id = ?`
+	err = db.Select(&results, query, pid)
 	if err != nil {
 		log.Print(err)
 		return
@@ -688,51 +755,51 @@ func postIndex(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/posts/"+strconv.FormatInt(pid, 10), http.StatusFound)
 }
 
-// func getImage(w http.ResponseWriter, r *http.Request) {
-// 	pidStr := r.PathValue("id")
-// 	pid, err := strconv.Atoi(pidStr)
-// 	if err != nil {
-// 		w.WriteHeader(http.StatusNotFound)
-// 		return
-// 	}
+func getImage(w http.ResponseWriter, r *http.Request) {
+	pidStr := r.PathValue("id")
+	pid, err := strconv.Atoi(pidStr)
+	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
 
-// 	post := Post{}
-// 	err = db.Get(&post, "SELECT * FROM `posts` WHERE `id` = ?", pid)
-// 	if err != nil {
-// 		log.Print(err)
-// 		return
-// 	}
+	post := Post{}
+	err = db.Get(&post, "SELECT * FROM `posts` WHERE `id` = ?", pid)
+	if err != nil {
+		log.Print(err)
+		return
+	}
 
-// 	ext := r.PathValue("ext")
+	ext := r.PathValue("ext")
 
-// 	if ext == "jpg" && post.Mime == "image/jpeg" ||
-// 		ext == "png" && post.Mime == "image/png" ||
-// 		ext == "gif" && post.Mime == "image/gif" {
+	if ext == "jpg" && post.Mime == "image/jpeg" ||
+		ext == "png" && post.Mime == "image/png" ||
+		ext == "gif" && post.Mime == "image/gif" {
 
-// 		f, err := os.Create(fmt.Sprintf("../public/image/%d.%s", pid, ext))
-// 		if err != nil {
-// 			log.Print(err)
-// 			return
-// 		}
-// 		defer f.Close()
+		f, err := os.Create(fmt.Sprintf("../public/image/%d.%s", pid, ext))
+		if err != nil {
+			log.Print(err)
+			return
+		}
+		defer f.Close()
 
-// 		_, err = f.Write(post.Imgdata)
-// 		if err != nil {
-// 			log.Print(err)
-// 			return
-// 		}
+		_, err = f.Write(post.Imgdata)
+		if err != nil {
+			log.Print(err)
+			return
+		}
 
-// 		w.Header().Set("Content-Type", post.Mime)
-// 		_, err = w.Write(post.Imgdata)
-// 		if err != nil {
-// 			log.Print(err)
-// 			return
-// 		}
-// 		return
-// 	}
+		w.Header().Set("Content-Type", post.Mime)
+		_, err = w.Write(post.Imgdata)
+		if err != nil {
+			log.Print(err)
+			return
+		}
+		return
+	}
 
-// 	w.WriteHeader(http.StatusNotFound)
-// }
+	w.WriteHeader(http.StatusNotFound)
+}
 
 func postComment(w http.ResponseWriter, r *http.Request) {
 	me := getSessionUser(r)
@@ -873,7 +940,7 @@ func main() {
 	r.Get("/posts", getPosts)
 	r.Get("/posts/{id}", getPostsID)
 	r.Post("/", postIndex)
-	// r.Get("/image/{id}.{ext}", getImage)
+	r.Get("/image/{id}.{ext}", getImage)
 	r.Post("/comment", postComment)
 	r.Get("/admin/banned", getAdminBanned)
 	r.Post("/admin/banned", postAdminBanned)

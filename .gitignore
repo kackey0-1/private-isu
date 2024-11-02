@@ -19,3 +19,8 @@ portal/tmp
 webapp/logs
 webapp/sql
 logs
+
+# public images
+webapp/public/image/*.gif
+webapp/public/image/*.jpg
+webapp/public/image/*.png
