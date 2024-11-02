@@ -21,7 +21,8 @@ isucon@ip-192-168-1-20:~$ /home/isucon/private_isu.git/benchmarker/bin/benchmark
 // ALTER TABLE users ADD INDEX del_flg_idx (del_flg);
 isucon@ip-192-168-1-20:~$ /home/isucon/private_isu.git/benchmarker/bin/benchmarker -u /home/isucon/private_isu.git/benchmarker/userdata -t http://57.180.133.103
 {"pass":true,"score":82499,"success":78855,"fail":0,"messages":[]}
-
+isucon@ip-192-168-1-20:~$ /home/isucon/private_isu.git/benchmarker/bin/benchmarker -u /home/isucon/private_isu.git/benchmarker/userdata -t http://57.180.133.103
+{"pass":true,"score":93117,"success":88919,"fail":0,"messages":[]}
 ```
 
 ## Access Log
@@ -70,7 +71,27 @@ isucon@ip-192-168-1-20:~$ /home/isucon/private_isu.git/benchmarker/bin/benchmark
 | 3729  | GET    | /js/main.js        | 0.000 | 0.000 | 0.000 | 0.000   |
 | 3729  | GET    | /css/style.css     | 0.000 | 0.000 | 0.000 | 0.000   |
 +-------+--------+--------------------+-------+-------+-------+---------+
-
++-------+--------+--------------------+-------+-------+-------+---------+
+| COUNT | METHOD |        URI         |  MIN  |  AVG  |  MAX  |   SUM   |
++-------+--------+--------------------+-------+-------+-------+---------+
+| 3196  | GET    | /                  | 0.008 | 0.080 | 0.182 | 255.191 |
+| 580   | GET    | /posts             | 0.070 | 0.182 | 0.230 | 105.566 |
+| 431   | GET    | /@\w+              | 0.058 | 0.166 | 0.268 | 71.653  |
+| 2765  | GET    | posts/[0-9]+       | 0.001 | 0.024 | 0.076 | 66.634  |
+| 2114  | POST   | /login             | 0.001 | 0.030 | 0.073 | 63.819  |
+| 243   | POST   | /register          | 0.015 | 0.043 | 0.121 | 10.551  |
+| 414   | POST   | /                  | 0.001 | 0.016 | 0.061 | 6.494   |
+| 4730  | GET    | /favicon.ico       | 0.000 | 0.001 | 0.027 | 6.317   |
+| 848   | GET    | /login             | 0.001 | 0.003 | 0.017 | 2.521   |
+| 185   | POST   | /comment           | 0.005 | 0.012 | 0.056 | 2.259   |
+| 424   | GET    | /logout            | 0.001 | 0.003 | 0.022 | 1.244   |
+| 243   | GET    | /admin/banned      | 0.001 | 0.004 | 0.019 | 1.076   |
+| 58773 | GET    | /image/\d+         | 0.000 | 0.000 | 0.007 | 0.530   |
+| 1     | GET    | /initialize        | 0.043 | 0.043 | 0.043 | 0.043   |
+| 4730  | GET    | /js/timeago.min.js | 0.000 | 0.000 | 0.000 | 0.000   |
+| 4730  | GET    | /js/main.js        | 0.000 | 0.000 | 0.000 | 0.000   |
+| 4730  | GET    | /css/style.css     | 0.000 | 0.000 | 0.000 | 0.000   |
++-------+--------+--------------------+-------+-------+-------+---------+
 
 
 ```
