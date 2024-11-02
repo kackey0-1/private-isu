@@ -85,14 +85,22 @@ Resources:
         Fn::Base64: !Sub |
           #!/bin/bash
           GITHUB_USER=${GitHubUsername}
-          mkdir -p /home/isucon/.ssh
-          curl -s https://github.com/$GITHUB_USER.keys >> /home/isucon/.ssh/authorized_keys
-          chown -R isucon:isucon /home/isucon/.ssh
-          chmod 600 /home/isucon/.ssh/authorized_keys
           sudo systemctl stop isu-ruby
           sudo systemctl disable isu-ruby
           sudo systemctl start isu-go
           sudo systemctl enable isu-go
+          cd /home/isucon/private_isu
+          git init
+          git remote add origin git@github.com:kackey0-1/private-isu.git
+          mkdir -p /home/isucon/.ssh
+          curl -s https://github.com/$GITHUB_USER.keys >> /home/isucon/.ssh/authorized_keys
+          cat <<EOF >> /home/isucon/.profile
+          if [ -f ~/.bashrc ]; then
+            . ~/.bashrc
+          fi
+          EOF
+          chown -R isucon:isucon /home/isucon/
+          chmod 600 /home/isucon/.ssh/authorized_keys
       Tags:
         - Key: Name
           Value: ServerInstance

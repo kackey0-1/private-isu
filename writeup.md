@@ -33,16 +33,10 @@ aws cloudformation create-stack --stack-name private-isu-v3 \
   --template-body file://cf/private-isu.yaml \
   --parameters ParameterKey=KeyPairName,ParameterValue=key-pair ParameterKey=GitHubUsername,ParameterValue=kackey0-1
 
-
-sudo systemctl stop isu-ruby
-sudo systemctl disable isu-ruby
-sudo systemctl start isu-go
-sudo systemctl enable isu-go
-
-git init 
 git fetch
 git clean -df
-git checkout -b main origin/main
+# git checkout -b main origin/main
+git checkout -b feature/setup origin/feature/setup
 
 sudo ls -l /etc/nginx/sites-enabled
 sudo ls -l /etc/nginx/
@@ -67,7 +61,7 @@ export ISUCONP_DB_NAME=isuconp
 
 ```bash
 sudo su - isucon
-/home/isucon/private_isu.git/benchmarker/bin/benchmarker -u /home/isucon/private_isu.git/benchmarker/userdata -t http://18.178.233.167
+/home/isucon/private_isu.git/benchmarker/bin/benchmarker -u /home/isucon/private_isu.git/benchmarker/userdata -t http://52.194.53.168
 ```
 
 ## AWS上のリソース削除
