@@ -61,7 +61,7 @@ export ISUCONP_DB_NAME=isuconp
 
 ```bash
 sudo su - isucon
-/home/isucon/private_isu.git/benchmarker/bin/benchmarker -u /home/isucon/private_isu.git/benchmarker/userdata -t http://52.194.53.168
+/home/isucon/private_isu.git/benchmarker/bin/benchmarker -u /home/isucon/private_isu.git/benchmarker/userdata -t http://57.180.133.103
 ```
 
 ## AWS上のリソース削除

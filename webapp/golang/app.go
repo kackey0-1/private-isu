@@ -402,8 +402,9 @@ func getIndex(w http.ResponseWriter, r *http.Request) {
 	FROM posts
 	JOIN users ON posts.user_id = users.id
 	WHERE users.del_flg = 0
-    ORDER BY posts.created_at DESC`
-	err := db.Select(&results, query)
+    ORDER BY posts.created_at DESC
+	LIMIT ?`
+	err := db.Select(&results, query, postsPerPage)
 	if err != nil {
 		log.Print(err)
 		return
@@ -465,8 +466,9 @@ func getAccountName(w http.ResponseWriter, r *http.Request) {
 	JOIN users ON posts.user_id = users.id
 	WHERE users.id = ?
 	AND users.del_flg = 0
-    ORDER BY posts.created_at DESC`
-	err = db.Select(&results, query, user.ID)
+    ORDER BY posts.created_at DESC
+	LIMIT ?`
+	err = db.Select(&results, query, user.ID, postsPerPage)
 	if err != nil {
 		log.Print(err)
 		return
@@ -571,8 +573,9 @@ func getPosts(w http.ResponseWriter, r *http.Request) {
 	JOIN users ON posts.user_id = users.id
 	WHERE posts.created_at <= ?
 	AND users.del_flg = 0
-    ORDER BY posts.created_at DESC`
-	err = db.Select(&results, query, t.Format(ISO8601Format))
+    ORDER BY posts.created_at DESC
+	LIMIT ?`
+	err = db.Select(&results, query, t.Format(ISO8601Format), postsPerPage)
 	if err != nil {
 		log.Print(err)
 		return
@@ -623,8 +626,9 @@ func getPostsID(w http.ResponseWriter, r *http.Request) {
         users.created_at AS "user.created_at"
 	FROM posts
 	JOIN users ON posts.user_id = users.id
-	WHERE posts.id = ?`
-	err = db.Select(&results, query, pid)
+	WHERE posts.id = ?
+	LIMIT ?`
+	err = db.Select(&results, query, pid, postsPerPage)
 	if err != nil {
 		log.Print(err)
 		return
