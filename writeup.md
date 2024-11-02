@@ -88,6 +88,7 @@ long_query_time = 0.5
 -> 以下のindexを追加
 ```sql
 ALTER TABLE comments ADD INDEX post_id_idx (post_id);
+ALTER TABLE posts ADD INDEX user_id_idx (user_id);
 ```
 
 ### ログフォーマットを修正して調査
@@ -115,3 +116,9 @@ server {
 scp isucon@52.194.167.18:/var/log/nginx/access.log webapp/logs/access.log
 alp json --sort sum -r -m "posts/[0-9]+,/@\w+,/image/\d+" -o count,method,uri,min,avg,max,sum < ./logs/access.log
 ```
+
+### 最初にやることリスト
+
+- indexを適用
+- cli実行でpublic resourceを作成すること
+
