@@ -16,3 +16,11 @@ portal/tmp
 !/portal/log/.keep
 /portal/tmp
 .vagrant
+webapp/logs
+webapp/sql
+logs
+
+# public images
+webapp/public/image/*.gif
+webapp/public/image/*.jpg
+webapp/public/image/*.png

@@ -203,17 +203,9 @@ func makePosts(results []Post, csrfToken string, allComments bool) ([]Post, erro
 		}
 
 		p.Comments = comments
-
-		err = db.Get(&p.User, "SELECT * FROM `users` WHERE `id` = ?", p.UserID)
-		if err != nil {
-			return nil, err
-		}
-
 		p.CSRFToken = csrfToken
+		posts = append(posts, p)
 
-		if p.User.DelFlg == 0 {
-			posts = append(posts, p)
-		}
 		if len(posts) >= postsPerPage {
 			break
 		}
@@ -385,8 +377,25 @@ func getIndex(w http.ResponseWriter, r *http.Request) {
 	me := getSessionUser(r)
 
 	results := []Post{}
-
-	err := db.Select(&results, "SELECT `id`, `user_id`, `body`, `mime`, `created_at` FROM `posts` ORDER BY `created_at` DESC")
+	query := `
+	SELECT
+		posts.id, 
+        posts.user_id, 
+        posts.body, 
+        posts.mime, 
+        posts.created_at,
+        users.id AS "user.id", 
+        users.account_name AS "user.account_name", 
+        users.passhash AS "user.passhash", 
+        users.authority AS "user.authority", 
+        users.del_flg AS "user.del_flg", 
+        users.created_at AS "user.created_at"
+	FROM posts
+	JOIN users ON posts.user_id = users.id
+	WHERE users.del_flg = 0
+    ORDER BY posts.created_at DESC
+	LIMIT ?`
+	err := db.Select(&results, query, postsPerPage)
 	if err != nil {
 		log.Print(err)
 		return
@@ -431,8 +440,26 @@ func getAccountName(w http.ResponseWriter, r *http.Request) {
 	}
 
 	results := []Post{}
-
-	err = db.Select(&results, "SELECT `id`, `user_id`, `body`, `mime`, `created_at` FROM `posts` WHERE `user_id` = ? ORDER BY `created_at` DESC", user.ID)
+	query := `
+	SELECT
+		posts.id, 
+        posts.user_id, 
+        posts.body, 
+        posts.mime, 
+        posts.created_at,
+        users.id AS "user.id", 
+        users.account_name AS "user.account_name", 
+        users.passhash AS "user.passhash", 
+        users.authority AS "user.authority", 
+        users.del_flg AS "user.del_flg", 
+        users.created_at AS "user.created_at"
+	FROM posts
+	JOIN users ON posts.user_id = users.id
+	WHERE users.id = ?
+	AND users.del_flg = 0
+    ORDER BY posts.created_at DESC
+	LIMIT ?`
+	err = db.Select(&results, query, user.ID, postsPerPage)
 	if err != nil {
 		log.Print(err)
 		return
@@ -520,7 +547,26 @@ func getPosts(w http.ResponseWriter, r *http.Request) {
 	}
 
 	results := []Post{}
-	err = db.Select(&results, "SELECT `id`, `user_id`, `body`, `mime`, `created_at` FROM `posts` WHERE `created_at` <= ? ORDER BY `created_at` DESC", t.Format(ISO8601Format))
+	query := `
+	SELECT
+		posts.id, 
+        posts.user_id, 
+        posts.body, 
+        posts.mime, 
+        posts.created_at,
+        users.id AS "user.id", 
+        users.account_name AS "user.account_name", 
+        users.passhash AS "user.passhash", 
+        users.authority AS "user.authority", 
+        users.del_flg AS "user.del_flg", 
+        users.created_at AS "user.created_at"
+	FROM posts
+	JOIN users ON posts.user_id = users.id
+	WHERE posts.created_at <= ?
+	AND users.del_flg = 0
+    ORDER BY posts.created_at DESC
+	LIMIT ?`
+	err = db.Select(&results, query, t.Format(ISO8601Format), postsPerPage)
 	if err != nil {
 		log.Print(err)
 		return
@@ -556,7 +602,23 @@ func getPostsID(w http.ResponseWriter, r *http.Request) {
 	}
 
 	results := []Post{}
-	err = db.Select(&results, "SELECT * FROM `posts` WHERE `id` = ?", pid)
+	query := `
+	SELECT
+		posts.id, 
+        posts.user_id, 
+        posts.body, 
+        posts.mime, 
+        posts.created_at,
+        users.id AS "user.id", 
+        users.account_name AS "user.account_name", 
+        users.passhash AS "user.passhash", 
+        users.authority AS "user.authority", 
+        users.del_flg AS "user.del_flg", 
+        users.created_at AS "user.created_at"
+	FROM posts
+	JOIN users ON posts.user_id = users.id
+	WHERE posts.id = ?`
+	err = db.Select(&results, query, pid)
 	if err != nil {
 		log.Print(err)
 		return
@@ -613,15 +675,19 @@ func postIndex(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	ext := ""
 	mime := ""
 	if file != nil {
 		// 投稿のContent-Typeからファイルのタイプを決定する
 		contentType := header.Header["Content-Type"][0]
 		if strings.Contains(contentType, "jpeg") {
 			mime = "image/jpeg"
+			ext = "jpg"
 		} else if strings.Contains(contentType, "png") {
+			ext = "png"
 			mime = "image/png"
 		} else if strings.Contains(contentType, "gif") {
+			ext = "gif"
 			mime = "image/gif"
 		} else {
 			session := getSession(r)
@@ -653,7 +719,7 @@ func postIndex(w http.ResponseWriter, r *http.Request) {
 		query,
 		me.ID,
 		mime,
-		filedata,
+		"", // filedata,
 		r.FormValue("body"),
 	)
 	if err != nil {
@@ -662,6 +728,19 @@ func postIndex(w http.ResponseWriter, r *http.Request) {
 	}
 
 	pid, err := result.LastInsertId()
+	if err != nil {
+		log.Print(err)
+		return
+	}
+
+	f, err := os.Create(fmt.Sprintf("../public/image/%d.%s", pid, ext))
+	if err != nil {
+		log.Print(err)
+		return
+	}
+	defer f.Close()
+
+	_, err = f.Write(filedata)
 	if err != nil {
 		log.Print(err)
 		return
@@ -690,8 +769,22 @@ func getImage(w http.ResponseWriter, r *http.Request) {
 	if ext == "jpg" && post.Mime == "image/jpeg" ||
 		ext == "png" && post.Mime == "image/png" ||
 		ext == "gif" && post.Mime == "image/gif" {
+
+		f, err := os.Create(fmt.Sprintf("../public/image/%d.%s", pid, ext))
+		if err != nil {
+			log.Print(err)
+			return
+		}
+		defer f.Close()
+
+		_, err = f.Write(post.Imgdata)
+		if err != nil {
+			log.Print(err)
+			return
+		}
+
 		w.Header().Set("Content-Type", post.Mime)
-		_, err := w.Write(post.Imgdata)
+		_, err = w.Write(post.Imgdata)
 		if err != nil {
 			log.Print(err)
 			return
@@ -815,7 +908,7 @@ func main() {
 	}
 
 	dsn := fmt.Sprintf(
-		"%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=true&loc=Local",
+		"%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=true&loc=Local&interpolateParams=true",
 		user,
 		password,
 		host,

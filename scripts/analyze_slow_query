@@ -1,0 +1,3 @@
+#!/bin/sh
+
+pt-query-digest ./logs/mysql-slow.log | tee  ./logs/_mysql-slow.log
