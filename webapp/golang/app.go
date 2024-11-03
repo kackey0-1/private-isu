@@ -617,9 +617,8 @@ func getPostsID(w http.ResponseWriter, r *http.Request) {
         users.created_at AS "user.created_at"
 	FROM posts
 	JOIN users ON posts.user_id = users.id
-	WHERE posts.id = ?
-	LIMIT ?`
-	err = db.Select(&results, query, pid, postsPerPage)
+	WHERE posts.id = ?`
+	err = db.Select(&results, query, pid)
 	if err != nil {
 		log.Print(err)
 		return
@@ -909,7 +908,7 @@ func main() {
 	}
 
 	dsn := fmt.Sprintf(
-		"%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=true&loc=Local",
+		"%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=true&loc=Local&interpolateParams=true",
 		user,
 		password,
 		host,

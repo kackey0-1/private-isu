@@ -3,11 +3,17 @@
 
 now=$(date +%Y%m%d-%H%M%S)
 REMOTE_USER="isucon"
-REMOTE_HOST="57.180.133.103"
+REMOTE_HOST="54.95.112.73"
 ACCESS_LOG="/var/log/nginx/access.log"
 SLOW_QUERY_LOG="/var/log/mysql/mysql-slow.log"
 
 mv ./logs/access.log ./logs/access.$now.log
 mv ./logs/mysql-slow.log ./logs/mysql-slow.$now.log
-ssh ${REMOTE_USER}@${REMOTE_HOST} "sudo cat ${REMOTE_DIR}${ACCESS_LOG}" > ./logs/access.log
-ssh ${REMOTE_USER}@${REMOTE_HOST} "sudo cat ${REMOTE_DIR}${SLOW_QUERY_LOG}" > ./logs/mysql-slow.log
+
+ssh ${REMOTE_USER}@${REMOTE_HOST} "sudo cp ${REMOTE_DIR}${SLOW_QUERY_LOG} /tmp/mysql-slow.log && sudo chmod 644 /tmp/mysql-slow.log"
+scp ${REMOTE_USER}@${REMOTE_HOST}:/tmp/mysql-slow.log ./logs/mysql-slow.log
+ssh ${REMOTE_USER}@${REMOTE_HOST} "sudo rm /tmp/mysql-slow.log"
+
+ssh ${REMOTE_USER}@${REMOTE_HOST} "sudo cp ${REMOTE_DIR}${ACCESS_LOG} /tmp/access.log && sudo chmod 644 /tmp/access.log"
+scp ${REMOTE_USER}@${REMOTE_HOST}:/tmp/access.log ./logs/access.log
+ssh ${REMOTE_USER}@${REMOTE_HOST} "sudo rm /tmp/mysql-slow.log"

@@ -21,8 +21,11 @@ isucon@ip-192-168-1-20:~$ /home/isucon/private_isu.git/benchmarker/bin/benchmark
 // ALTER TABLE users ADD INDEX del_flg_idx (del_flg);
 isucon@ip-192-168-1-20:~$ /home/isucon/private_isu.git/benchmarker/bin/benchmarker -u /home/isucon/private_isu.git/benchmarker/userdata -t http://57.180.133.103
 {"pass":true,"score":82499,"success":78855,"fail":0,"messages":[]}
+// After removal of fetch users
 isucon@ip-192-168-1-20:~$ /home/isucon/private_isu.git/benchmarker/bin/benchmarker -u /home/isucon/private_isu.git/benchmarker/userdata -t http://57.180.133.103
 {"pass":true,"score":93117,"success":88919,"fail":0,"messages":[]}
+isucon@ip-192-168-1-20:~$ /home/isucon/private_isu.git/benchmarker/bin/benchmarker -u /home/isucon/private_isu.git/benchmarker/userdata -t http://54.95.112.73
+{"pass":true,"score":92392,"success":88277,"fail":0,"messages":[]}
 ```
 
 ## Access Log
